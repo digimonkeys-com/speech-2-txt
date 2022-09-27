@@ -1,0 +1,58 @@
+version: "3.8"
+services:
+  db:
+    container_name: db
+    image: postgres:14-alpine
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: speech-recording
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  app:
+    container_name: app
+    build: ./app
+    command: bash -c "wait-for-it --service db:5432 && alembic upgrade head && python run.py"
+    tty: True
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_HOST: $POSTGRES_HOST
+      SECRET_KEY: $SECRET_KEY
+      ALGORITHM: $ALGORITHM
+      ACCESS_TOKEN_EXPIRE_MINUTES: $ACCESS_TOKEN_EXPIRE_MINUTES
+      MAIL_USERNAME: $MAIL_USERNAME
+      MAIL_PASSWORD: $MAIL_PASSWORD
+      MAIL_FROM: $MAIL_FROM
+      MAIL_PORT: $MAIL_PORT
+      MAIL_SERVER: $MAIL_SERVER
+      MAIL_TLS: $MAIL_TLS
+      MAIL_SSL: $MAIL_SSL
+      USE_CREDENTIALS: $USE_CREDENTIALS
+      VALIDATE_CERTS:  $VALIDATE_CERTS
+      ROOT_PATH: $ROOT_PATH
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - "5050:80"
+    logging:
+      driver: none
+
+volumes:
+  db_data:
+  pgadmin_data:

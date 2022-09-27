@@ -1,0 +1,53 @@
+version: "3.8"
+services:
+  db:
+    container_name: db-local
+    image: postgres:14-alpine
+    volumes:
+      - db_data-local:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: speech-recording
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  app:
+    container_name: app-local
+    build: ./app
+    command: bash -c "wait-for-it --service db:5432 && alembic upgrade head && python run.py"
+    tty: True
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: speech-recording
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST: db
+
+  pgadmin:
+    container_name: pgadmin-local
+    image: dpage/pgadmin4
+    volumes:
+      - pgadmin_data-local:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - "5050:80"
+    logging:
+      driver: none
+
+  nginx:
+    container_name: nginx-local
+    build:
+      context: ./nginx
+      dockerfile: dev.Dockerfile
+    ports:
+      - "80:80"
+
+volumes:
+  db_data-local:
+  pgadmin_data-local:
