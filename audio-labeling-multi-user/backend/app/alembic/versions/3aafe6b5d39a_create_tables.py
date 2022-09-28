@@ -43,7 +43,6 @@ def upgrade() -> None:
         users_table,
         [
             {
-                "id": 1,
                 "email": "test@test.com",
                 "password": Hash.get_password_hash("test"),
                 "name": "Test",

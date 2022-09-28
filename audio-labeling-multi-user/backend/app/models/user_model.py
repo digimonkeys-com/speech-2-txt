@@ -1,12 +1,7 @@
-import uuid
-
-from fastapi import HTTPException, status
-
 from datetime import datetime, timedelta
 
 from sqlalchemy import Column, String, DateTime, Text, Boolean, Integer
 from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy_utils import EmailType
 
 from db.database import Base
@@ -14,7 +9,7 @@ from db.database import Base
 
 class User(Base):
     __tablename__ = "user"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(EmailType, unique=True, nullable=False)
     password = Column(Text)
     name = Column(String(32), nullable=False)
@@ -31,15 +26,7 @@ class User(Base):
 
     @staticmethod
     def get_user_by_id(db, user_id):
-        try:
-            uuid_user = uuid.UUID(user_id, version=4)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid user id, try again."
-            )
-        if str(uuid_user) == user_id:
-            return db.query(User).filter(User.user_id == user_id)
+        return db.query(User).filter(User.user_id == user_id)
 
     @staticmethod
     def get_user_by_email(db, email):

@@ -30,5 +30,5 @@ passlib[bcrypt]==1.7.4
 python-multipart==0.0.5
 
 # pydantic validation
-email-validator==1.2.1
+email-validator
 
